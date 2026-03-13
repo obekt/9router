@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import Button from "@/shared/components/Button";
-import { Modal } from "@/shared/components/Modal";
+import Modal from "@/shared/components/Modal";
 
 // Utility function for formatting reset time (client-safe)
 function formatResetTime(isoString) {
