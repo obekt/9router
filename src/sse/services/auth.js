@@ -1,7 +1,8 @@
-import { getProviderConnections, validateApiKey, updateProviderConnection, getSettings } from "@/lib/localDb";
+import { getProviderConnections, validateApiKey, updateProviderConnection, getSettings, getDb } from "@/lib/localDb";
 import { resolveConnectionProxyConfig } from "@/lib/network/connectionProxy";
 import { formatRetryAfter, checkFallbackError, isModelLockActive, buildModelLockUpdate, getEarliestModelLockUntil } from "open-sse/services/accountFallback.js";
 import { resolveProviderId } from "@/shared/constants/providers.js";
+import { checkQuotaLimit } from "@/lib/apiKeyQuota.js";
 import * as log from "../utils/logger.js";
 
 // Mutex to prevent race conditions during account selection
@@ -256,8 +257,32 @@ export function extractApiKey(request) {
 
 /**
  * Validate API key (optional - for local use can skip)
+ * Returns { valid: boolean, apiKey?: object, quotaStatus?: object }
  */
 export async function isValidApiKey(apiKey) {
-  if (!apiKey) return false;
-  return await validateApiKey(apiKey);
+  if (!apiKey) return { valid: false };
+  
+  const db = await getDb();
+  const found = db.data.apiKeys.find(k => k.key === apiKey);
+  
+  if (!found || found.isActive === false) {
+    return { valid: false };
+  }
+  
+  // Check quota
+  const quotaStatus = checkQuotaLimit(found);
+  
+  if (!quotaStatus.allowed) {
+    return { 
+      valid: false, 
+      quotaExceeded: true,
+      quotaStatus 
+    };
+  }
+  
+  return { 
+    valid: true,
+    apiKey: found,
+    quotaStatus
+  };
 }

@@ -17,6 +17,7 @@ import { detectFormatByEndpoint } from "open-sse/translator/formats.js";
 import * as log from "../utils/logger.js";
 import { updateProviderCredentials, checkAndRefreshToken } from "../services/tokenRefresh.js";
 import { getProjectIdForConnection } from "open-sse/services/projectId.js";
+import { incrementApiKeyUsage } from "@/lib/apiKeyQuota.js";
 
 /**
  * Handle chat completion request
@@ -64,16 +65,30 @@ export async function handleChat(request, clientRawRequest = null) {
 
   // Enforce API key if enabled in settings
   const settings = await getSettings();
+  let apiKeyData = null;
+  
   if (settings.requireApiKey) {
     if (!apiKey) {
       log.warn("AUTH", "Missing API key (requireApiKey=true)");
       return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Missing API key");
     }
-    const valid = await isValidApiKey(apiKey);
-    if (!valid) {
+    
+    const validation = await isValidApiKey(apiKey);
+    
+    if (!validation.valid) {
+      if (validation.quotaExceeded) {
+        log.warn("AUTH", `API key quota exceeded: ${log.maskKey(apiKey)}`);
+        const resetIn = Math.ceil((validation.quotaStatus.resetInMs || 0) / (1000 * 60 * 60));
+        return errorResponse(
+          HTTP_STATUS.TOO_MANY_REQUESTS, 
+          `API key quota exceeded. ${validation.quotaStatus.used}/${validation.quotaStatus.limit} requests used. Resets in ${resetIn}h.`
+        );
+      }
       log.warn("AUTH", "Invalid API key (requireApiKey=true)");
       return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
     }
+    
+    apiKeyData = validation.apiKey;
   }
 
   if (!modelStr) {
@@ -194,6 +209,12 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
       },
       onRequestSuccess: async () => {
         await clearAccountError(credentials.connectionId, credentials, model);
+        // Increment API key quota if API key was used
+        if (apiKeyData) {
+          await incrementApiKeyUsage(apiKeyData.id).catch(err => {
+            log.warn("QUOTA", `Failed to increment quota: ${err.message}`);
+          });
+        }
       }
     });
 
