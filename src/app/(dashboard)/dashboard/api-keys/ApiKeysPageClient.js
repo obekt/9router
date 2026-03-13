@@ -4,7 +4,22 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import Button from "@/shared/components/Button";
 import { Modal } from "@/shared/components/Modal";
-import { formatResetTime } from "@/lib/apiKeyQuota";
+
+// Utility function for formatting reset time (client-safe)
+function formatResetTime(isoString) {
+  if (!isoString) return 'N/A';
+  
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = date.getTime() - now.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  
+  if (diffHours < 24) {
+    return `in ${diffHours}h`;
+  }
+  
+  return date.toLocaleString();
+}
 
 export default function ApiKeysPageClient({ machineId }) {
   const [keys, setKeys] = useState([]);
