@@ -86,7 +86,15 @@ export default function ApiKeysPageClient({ machineId }) {
 
   const handleSetQuota = async (e) => {
     e.preventDefault();
-    if (!selectedKey) return;
+    if (!selectedKey || !selectedKey.id) {
+      alert("No API key selected");
+      return;
+    }
+
+    console.log("Setting quota for key:", selectedKey.id, {
+      dailyLimit: dailyLimit ? parseInt(dailyLimit) : null,
+      monthlyLimit: monthlyLimit ? parseInt(monthlyLimit) : null,
+    });
 
     try {
       const res = await fetch(`/api/keys/${selectedKey.id}/quota`, {
@@ -98,11 +106,14 @@ export default function ApiKeysPageClient({ machineId }) {
         }),
       });
 
+      const data = await res.json();
+      console.log("Quota API response:", res.status, data);
+
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || "Failed to set quota");
+        throw new Error(data.error || "Failed to set quota");
       }
 
+      alert("✅ Quota saved successfully!");
       fetchKeys();
       setShowQuotaModal(false);
       setSelectedKey(null);
@@ -110,11 +121,16 @@ export default function ApiKeysPageClient({ machineId }) {
       setQuotaMonthlyLimit("");
     } catch (error) {
       console.error("Failed to set quota:", error);
-      alert(`Failed to set quota: ${error.message}`);
+      alert(`❌ Failed to set quota: ${error.message}`);
     }
   };
 
   const openQuotaModal = (key) => {
+    console.log("Opening quota modal for key:", key);
+    if (!key || !key.id) {
+      alert("Invalid API key");
+      return;
+    }
     setSelectedKey(key);
     setQuotaDailyLimit(key.quota?.dailyLimit || "");
     setQuotaMonthlyLimit(key.quota?.monthlyLimit || "");
