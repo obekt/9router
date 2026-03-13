@@ -92,8 +92,8 @@ export default function ApiKeysPageClient({ machineId }) {
     }
 
     console.log("Setting quota for key:", selectedKey.id, {
-      dailyLimit: dailyLimit ? parseInt(dailyLimit) : null,
-      monthlyLimit: monthlyLimit ? parseInt(monthlyLimit) : null,
+      dailyLimit: quotaDailyLimit ? parseInt(quotaDailyLimit) : null,
+      monthlyLimit: quotaMonthlyLimit ? parseInt(quotaMonthlyLimit) : null,
     });
 
     try {
@@ -101,8 +101,8 @@ export default function ApiKeysPageClient({ machineId }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          dailyLimit: dailyLimit ? parseInt(dailyLimit) : null,
-          monthlyLimit: monthlyLimit ? parseInt(monthlyLimit) : null,
+          dailyLimit: quotaDailyLimit ? parseInt(quotaDailyLimit) : null,
+          monthlyLimit: quotaMonthlyLimit ? parseInt(quotaMonthlyLimit) : null,
         }),
       });
 
