@@ -169,7 +169,7 @@ export default function ApiKeysPageClient({ machineId }) {
           </p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
-          <span className="material-icons text-sm mr-1">add</span>
+          <span className="material-symbols-outlined text-sm mr-1">add</span>
           Create API Key
         </Button>
       </div>
@@ -177,7 +177,7 @@ export default function ApiKeysPageClient({ machineId }) {
       {/* Info Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <div className="flex items-start gap-3">
-          <span className="material-icons text-blue-600 text-xl">info</span>
+          <span className="material-symbols-outlined text-blue-600 text-xl">info</span>
           <div className="text-sm text-blue-800">
             <p className="font-semibold mb-1">How API Keys Work:</p>
             <ul className="list-disc list-inside space-y-1 text-blue-700">
@@ -241,7 +241,7 @@ export default function ApiKeysPageClient({ machineId }) {
                         className="text-gray-400 hover:text-gray-600"
                         title="Copy full key"
                       >
-                        <span className="material-icons text-sm">content_copy</span>
+                        <span className="material-symbols-outlined text-sm">content_copy</span>
                       </button>
                     </div>
                   </td>
@@ -313,14 +313,14 @@ export default function ApiKeysPageClient({ machineId }) {
                         onClick={() => openQuotaModal(key)}
                         className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
                       >
-                        <span className="material-icons text-sm">data_usage</span>
+                        <span className="material-symbols-outlined text-sm">data_usage</span>
                         Quota
                       </button>
                       <button
                         onClick={() => handleDeleteKey(key.id, key.name)}
                         className="text-red-600 hover:text-red-900 flex items-center gap-1"
                       >
-                        <span className="material-icons text-sm">delete</span>
+                        <span className="material-symbols-outlined text-sm">delete</span>
                         Delete
                       </button>
                     </div>
@@ -387,7 +387,7 @@ export default function ApiKeysPageClient({ machineId }) {
                     className="text-green-600 hover:text-green-800 p-2"
                     title="Copy to clipboard"
                   >
-                    <span className="material-icons">content_copy</span>
+                    <span className="material-symbols-outlined">content_copy</span>
                   </button>
                 </div>
               </div>
