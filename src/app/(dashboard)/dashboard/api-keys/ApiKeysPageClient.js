@@ -38,8 +38,15 @@ export default function ApiKeysPageClient({ machineId }) {
 
   const fetchKeys = async () => {
     try {
-      const res = await fetch("/api/keys");
+      const res = await fetch("/api/keys", {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await res.json();
+      console.log("Fetched API keys:", data.keys);
       setKeys(data.keys || []);
     } catch (error) {
       console.error("Failed to fetch API keys:", error);
@@ -127,13 +134,15 @@ export default function ApiKeysPageClient({ machineId }) {
 
   const openQuotaModal = (key) => {
     console.log("Opening quota modal for key:", key);
+    console.log("Key ID:", key?.id);
+    console.log("Key quota:", key?.quota);
     if (!key || !key.id) {
       alert("Invalid API key");
       return;
     }
     setSelectedKey(key);
-    setQuotaDailyLimit(key.quota?.dailyLimit || "");
-    setQuotaMonthlyLimit(key.quota?.monthlyLimit || "");
+    setQuotaDailyLimit(key.quota?.dailyLimit ?? "");
+    setQuotaMonthlyLimit(key.quota?.monthlyLimit ?? "");
     setShowQuotaModal(true);
   };
 
